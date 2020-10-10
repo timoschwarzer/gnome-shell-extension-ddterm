@@ -73,7 +73,9 @@ function bind_settings_ro(settings, key, target, property = null) {
     if (!property)
         property = key;
 
-    settings.bind(key, target, property, Gio.SettingsBindFlags.GET | Gio.SettingsBindFlags.NO_SENSITIVITY);
+    settings.connect(`changed::${key}`, () => {
+        target.set_property(property, settings.get_value(key).unpack());
+    });
 }
 
 GObject.type_ensure(Vte.Terminal);
