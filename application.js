@@ -630,6 +630,10 @@ const Application = GObject.registerClass(
         startup() {
             simple_action(this, 'quit', this.quit.bind(this));
 
+            const css_provider = new Gtk.CssProvider();
+            css_provider.load_from_file(APP_DATA_DIR.get_child('appwindow.css'));
+            Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+
             this.settings = get_settings();
 
             const menus = Gtk.Builder.new_from_file(APP_DATA_DIR.get_child('menus.ui').get_path());

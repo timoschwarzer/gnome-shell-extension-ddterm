@@ -41,8 +41,9 @@ prefs enable disable reset info show:
 .PHONY: prefs enable disable reset info show
 
 EXTENSION_PACK := $(EXTENSION_UUID).shell-extension.zip
-$(EXTENSION_PACK): EXTRA_SOURCES := $(filter-out extension.js prefs.js,$(wildcard *.ui *.js))
-$(EXTENSION_PACK): $(SCHEMAS) $(EXTRA_SOURCES) extension.js prefs.js metadata.json
+INCLUDED_BY_DEFAULT := extension.js prefs.js stylesheet.css metadata.json
+$(EXTENSION_PACK): EXTRA_SOURCES := $(filter-out $(INCLUDED_BY_DEFAULT),$(wildcard *.ui *.js *.css))
+$(EXTENSION_PACK): $(SCHEMAS) $(EXTRA_SOURCES) $(INCLUDED_BY_DEFAULT)
 	gnome-extensions pack -f $(addprefix --schema=,$(SCHEMAS)) $(addprefix --extra-source=,$(EXTRA_SOURCES)) .
 
 pack: $(EXTENSION_PACK)
