@@ -17,6 +17,59 @@ const APP_DATA_DIR = Gio.File.new_for_commandline_arg(System.programInvocationNa
 
 imports.searchPath.unshift(APP_DATA_DIR.get_path());
 
+const { rxjs } = imports.rxjs;
+
+/**
+ * https://developer.mozilla.org/docs/Web/API/WindowOrWorkerGlobalScope/setInterval
+ * https://developer.mozilla.org/docs/Web/API/WindowOrWorkerGlobalScope/clearInterval
+ */
+window.setInterval = function(func, delay, ...args) {
+    return GLib.timeout_add(GLib.PRIORITY_DEFAULT, delay, () => {
+        func(...args);
+        return GLib.SOURCE_CONTINUE;
+    });
+};
+
+window.clearInterval = GLib.source_remove;
+
+
+/**
+ * https://developer.mozilla.org/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout
+ * https://developer.mozilla.org/docs/Web/API/WindowOrWorkerGlobalScope/clearTimeout
+ */
+window.setTimeout = function(func, delay, ...args) {
+    return GLib.timeout_add(GLib.PRIORITY_DEFAULT, delay, () => {
+        func(...args);
+        return GLib.SOURCE_REMOVE;
+    });
+};
+
+window.clearTimeout = GLib.source_remove;
+
+function signal_observable(obj, signal) {
+    return new rxjs.Observable(subscriber => {
+        obj.connect(signal, ...args => subscriber.next(args));
+    });
+}
+
+function property_observable(obj, property, initial = true) {
+    return new rxjs.Observable(subscriber => {
+        if (initial)
+            subscriber.next(obj.get_property(property).unpack());
+
+        obj.connect(`notify::${property}`, () => subscriber.next(obj.get_property(property).unpack()));
+    });
+}
+
+function setting_observable(settings, key, initial = true) {
+    return new rxjs.Observable(subscriber => {
+        if (initial)
+            subscriber.next(settings.get_value(key).unpack());
+
+        settings.connect(`changed::${key}`, () => subscriber.next(settings.get_value(key).unpack()));
+    });
+}
+
 function parse_rgba(s) {
     if (!s)
         return null;
@@ -73,9 +126,10 @@ function bind_settings_ro(settings, key, target, property = null) {
     if (!property)
         property = key;
 
-    settings.connect(`changed::${key}`, () => {
+    /*settings.connect(`changed::${key}`, () => {
         target.set_property(property, settings.get_value(key).unpack());
-    });
+    });*/
+    setting_observable(settings, key).subscribe(v => target.set_property(property, v));
 }
 
 GObject.type_ensure(Vte.Terminal);

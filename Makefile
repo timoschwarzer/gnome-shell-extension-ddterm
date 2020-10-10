@@ -10,17 +10,20 @@ schemas/gschemas.compiled: $(SCHEMAS)
 	glib-compile-schemas --strict $(dir $@)
 
 lint/eslintrc-gjs.yml:
-	curl -o $@ 'https://gitlab.gnome.org/GNOME/gjs/-/raw/master/.eslintrc.yml'
+	curl -Lo $@ 'https://gitlab.gnome.org/GNOME/gjs/-/raw/master/.eslintrc.yml'
 
 lint: lint/eslintrc-gjs.yml
 	eslint .
 
 .PHONY: lint
 
+rxjs.js:
+	curl -Lo $@ 'https://unpkg.com/rxjs/bundles/rxjs.umd.min.js'
+
 EXTENSION_UUID := ddterm@amezin.github.com
 DEVELOP_SYMLINK := $(HOME)/.local/share/gnome-shell/extensions/$(EXTENSION_UUID)
 
-develop: schemas/gschemas.compiled
+develop: schemas/gschemas.compiled rxjs.js
 	mkdir -p "$(dir $(DEVELOP_SYMLINK))"
 	if [[ "$(abspath .)" != "$(abspath $(DEVELOP_SYMLINK))" ]]; then \
 		ln -snf "$(abspath .)" "$(DEVELOP_SYMLINK)"; \
@@ -41,7 +44,7 @@ prefs enable disable reset info show:
 .PHONY: prefs enable disable reset info show
 
 EXTENSION_PACK := $(EXTENSION_UUID).shell-extension.zip
-$(EXTENSION_PACK): EXTRA_SOURCES := $(filter-out extension.js prefs.js,$(wildcard *.ui *.js))
+$(EXTENSION_PACK): EXTRA_SOURCES := $(filter-out extension.js prefs.js rxjs.js,$(wildcard *.ui *.js)) rxjs.js
 $(EXTENSION_PACK): $(SCHEMAS) $(EXTRA_SOURCES) extension.js prefs.js metadata.json
 	gnome-extensions pack -f $(addprefix --schema=,$(SCHEMAS)) $(addprefix --extra-source=,$(EXTRA_SOURCES)) .
 
