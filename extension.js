@@ -55,6 +55,8 @@ function enable() {
 
     settings.connect('changed::window-above', set_window_above);
     settings.connect('changed::window-stick', set_window_stick);
+    settings.connect('changed::window-monitor', place_window);
+    settings.connect('changed::window-monitor-index', place_window);
 }
 
 function disable() {
@@ -184,15 +186,8 @@ function track_window(win) {
     win.connect('unmanaging', untrack_window);
     win.connect('unmanaged', untrack_window);
 
-    let height_ratio = settings.get_double('window-height');
-
-    if (win.get_client_type() === Meta.WindowClientType.WAYLAND) {
-        if (Meta.prefs_get_auto_maximize())
-            height_ratio = Math.min(height_ratio, 0.8);
-    }
-
-    const workarea = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.currentMonitor.index);
-    win.move_resize_frame(true, workarea.x, workarea.y, workarea.width, workarea.height * height_ratio);
+    place_window();
+    queue_place_window();
 
     // Sometimes size-changed is emitted from .move_resize_frame() with .get_frame_rect() returning old/incorrect size.
     // Thus connect to size-changed only after initial size is set.
@@ -202,6 +197,44 @@ function track_window(win) {
 
     set_window_above();
     set_window_stick();
+}
+
+function get_monitor_index() {
+    const mode = settings.get_string('window-monitor');
+
+    if (mode === 'index') {
+        const index = settings.get_int('window-monitor-index');
+        if (index >= 0 && index < global.display.get_n_monitors())
+            return index;
+    }
+
+    if (mode === 'primary')
+        return global.display.get_primary_monitor();
+
+    return global.display.get_current_monitor();
+}
+
+function place_window() {
+    if (current_window === null)
+        return;
+
+    let height_ratio = settings.get_double('window-height');
+
+    if (current_window.get_client_type() === Meta.WindowClientType.WAYLAND) {
+        if (Meta.prefs_get_auto_maximize())
+            height_ratio = Math.min(height_ratio, 0.8);
+    }
+
+    const monitor_index = get_monitor_index();
+    const workarea = Main.layoutManager.getWorkAreaForMonitor(monitor_index);
+    current_window.move_resize_frame(true, workarea.x, workarea.y, workarea.width, workarea.height * height_ratio);
+}
+
+function queue_place_window() {
+    GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+        place_window();
+        return GLib.SOURCE_REMOVE;
+    });
 }
 
 function update_height_setting(win) {
@@ -226,6 +259,7 @@ function untrack_window(win) {
 
     if (win) {
         GObject.signal_handlers_disconnect_by_func(win, untrack_window);
+        GObject.signal_handlers_disconnect_by_func(win, queue_place_window);
         GObject.signal_handlers_disconnect_by_func(win, update_height_setting);
     }
 }

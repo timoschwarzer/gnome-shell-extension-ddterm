@@ -77,6 +77,8 @@ function createPrefsWidgetClass(resource_path, util) {
                 'reset_compatibility_button',
                 'pointer_autohide_check',
                 'force_gdk_x11_check',
+                'index_monitor_radio',
+                'monitor_index_combo',
             ].concat(palette_widgets()),
             Properties: {
                 'settings': GObject.ParamSpec.object('settings', '', '', GObject.ParamFlags.READWRITE | GObject.ParamFlags.CONSTRUCT_ONLY, Gio.Settings),
@@ -95,6 +97,7 @@ function createPrefsWidgetClass(resource_path, util) {
                 this.settings_bind('hide-window-on-esc', this.hide_window_on_esc_check, 'active');
                 this.settings_bind('pointer-autohide', this.pointer_autohide_check, 'active');
                 this.settings_bind('force-x11-gdk-backend', this.force_gdk_x11_check, 'active');
+                this.index_monitor_radio.bind_property('active', this.monitor_index_combo.parent, 'sensitive', GObject.BindingFlags.SYNC_CREATE);
 
                 this.settings_bind('tab-policy', this.tab_policy_combo, 'active-id');
                 this.settings_bind('tab-expand', this.expand_tabs_check, 'active');
@@ -153,6 +156,7 @@ function createPrefsWidgetClass(resource_path, util) {
 
                 const actions = Gio.SimpleActionGroup.new();
                 actions.add_action(this.settings.create_action('command'));
+                actions.add_action(this.settings.create_action('window-monitor'));
                 this.insert_action_group('settings', actions);
 
                 this.settings_bind('custom-command', this.custom_command_entry, 'text');
