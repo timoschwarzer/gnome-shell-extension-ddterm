@@ -58,6 +58,10 @@ const Application = GObject.registerClass(
                 settings_schema: settings_source.lookup('com.github.amezin.ddterm', true),
             });
 
+            this.gtk_settings = Gtk.Settings.get_default();
+            this.settings.connect('changed::theme-variant', this.update_theme.bind(this));
+            this.update_theme();
+
             const desktop_settings = new Gio.Settings({
                 schema_id: 'org.gnome.desktop.interface',
             });
@@ -76,10 +80,6 @@ const Application = GObject.registerClass(
             this.add_action(this.window.hide_action);
 
             this.simple_action('preferences', this.preferences.bind(this));
-
-            this.gtk_settings = Gtk.Settings.get_default();
-            this.settings.connect('changed::theme-variant', this.update_theme.bind(this));
-            this.update_theme();
 
             this.setup_shortcut('shortcut-window-hide', 'win.hide');
             this.setup_shortcut('shortcut-terminal-copy', 'terminal.copy');
