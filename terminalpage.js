@@ -120,6 +120,10 @@ var TerminalPage = GObject.registerClass(
             this.method_handler(this.settings, 'changed::cjk-utf8-ambiguous-width', this.update_ambiguous_width);
             this.update_ambiguous_width();
 
+            this.method_handler(this.settings, 'changed::detect-urls', this.setup_url_detection);
+            this.method_handler(this.settings, 'changed::url-detection-patterns', this.setup_url_detection);
+            this.setup_url_detection();
+
             this.method_handler(this.settings, 'changed::foreground-color', this.update_color_foreground);
             this.method_handler(this.terminal, 'style-updated', this.update_color_foreground);
 
@@ -560,6 +564,28 @@ var TerminalPage = GObject.registerClass(
 
         new_tab_after() {
             this.emit('new-tab-after-request');
+        }
+
+        get_url_detection_patterns() {
+            if (!this.settings.get_boolean('detect-urls'))
+                return [];
+
+            return this.settings.get_string('url-detection-patterns').split('\n').filter(v => v);
+        }
+
+        setup_url_detection() {
+            const PCRE2_MULTILINE = 0x00000400;
+
+            this.terminal.match_remove_all();
+
+            const patterns = this.get_url_detection_patterns();
+            patterns.forEach(pattern => {
+                try {
+                    const regex = Vte.Regex.new_for_match(pattern, -1, PCRE2_MULTILINE);
+                    this.terminal.match_add_regex(regex, 0);
+                } catch {
+                }
+            });
         }
     }
 );

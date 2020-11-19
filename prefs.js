@@ -67,6 +67,9 @@ function createPrefsWidgetClass(resource_path, util) {
                 'reset_tab_title_button',
                 'window_type_hint_combo',
                 'window_height_adjustment',
+                'url_detection_pattern_container',
+                'url_detection_pattern_reset_button',
+                'url_detection_pattern_buffer',
             ].concat(palette_widgets()),
             Properties: {
                 'settings': GObject.ParamSpec.object('settings', '', '', GObject.ParamFlags.READWRITE | GObject.ParamFlags.CONSTRUCT_ONLY, Gio.Settings),
@@ -104,6 +107,7 @@ function createPrefsWidgetClass(resource_path, util) {
                     'scroll-on-keystroke',
                     'shortcuts-enabled',
                     'window-resizable',
+                    'detect-urls',
                 ].forEach(
                     key => actions.add_action(this.settings.create_action(key))
                 );
@@ -122,6 +126,11 @@ function createPrefsWidgetClass(resource_path, util) {
                 this.settings_bind('text-blink-mode', this.text_blink_mode_combo, 'active-id');
                 this.settings_bind('cursor-blink-mode', this.cursor_blink_mode_combo, 'active-id');
                 this.settings_bind('cursor-shape', this.cursor_shape_combo, 'active-id');
+                this.bind_sensitive('detect-urls', this.url_detection_pattern_container);
+                this.signal_connect(this.url_detection_pattern_reset_button, 'clicked', () => {
+                    this.settings.reset('url-detection-patterns');
+                });
+                this.settings_bind('url-detection-patterns', this.url_detection_pattern_buffer, 'text');
 
                 this.bind_color('foreground-color', this.foreground_color);
                 this.bind_color('background-color', this.background_color);
