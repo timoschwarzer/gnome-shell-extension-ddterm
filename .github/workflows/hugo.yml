@@ -1,0 +1,13 @@
+name: hugo
+
+on: [push]
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: wget https://github.com/gohugoio/hugo/releases/download/v0.79.0/hugo_extended_0.79.0_Linux-64bit.deb
+        working-directory: ${{ runner.temp }}
+      - run: sudo dpkg -i *.deb
+        working-directory: ${{ runner.temp }}
