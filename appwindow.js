@@ -181,6 +181,9 @@ var AppWindow = GObject.registerClass(
             if (!button_ok || button !== Gdk.BUTTON_PRIMARY)
                 return;
 
+            if (!(this.window.get_state() & Gdk.WindowState.BOTTOM_RESIZABLE))
+                this.unmaximize();
+
             const [coords_ok, x_root, y_root] = event.get_root_coords();
             if (!coords_ok)
                 return;

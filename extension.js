@@ -250,8 +250,6 @@ function track_window(win) {
 
     const workarea = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.currentMonitor.index);
     const target_rect = target_rect_for_workarea(workarea);
-    const max_height = workarea.height - (win.get_client_type() === Meta.WindowClientType.X11 ? 0 : 1);
-    target_rect.height = Math.min(target_rect.height, max_height);
 
     move_resize_window(win, target_rect);
 
@@ -285,7 +283,13 @@ function unmaximize_window(win) {
     if (!win || win !== current_window)
         return;
 
-    if (win.maximized_vertically)
+    if (!win.maximized_vertically)
+        return;
+
+    const workarea = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.currentMonitor.index);
+    const target_rect = target_rect_for_workarea(workarea);
+
+    if (target_rect.height < workarea.height)
         win.unmaximize(Meta.MaximizeFlags.VERTICAL);
 }
 
@@ -324,8 +328,13 @@ function update_window_height() {
         return;
 
     const target_rect = target_rect_for_workarea(workarea);
-    if (!target_rect.equal(current_window.get_frame_rect()))
-        move_resize_window(current_window, target_rect);
+    if (target_rect.equal(current_window.get_frame_rect()))
+        return;
+
+    if (target_rect.height < workarea.height && current_window.maximized_vertically)
+        current_window.unmaximize(Meta.MaximizeFlags.VERTICAL);
+
+    move_resize_window(current_window, target_rect);
 }
 
 function untrack_window(win) {
