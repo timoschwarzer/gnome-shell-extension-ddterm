@@ -38,6 +38,11 @@ const { util } = imports;
 util.APP_DATA_DIR = APP_DATA_DIR;
 
 const Application = GObject.registerClass(
+    {
+        Signals: {
+            'destroy': {},
+        },
+    },
     class Application extends Gtk.Application {
         _init(params) {
             super._init(params);
@@ -57,9 +62,10 @@ const Application = GObject.registerClass(
             this.env_gdk_backend = null;
             this.unset_gdk_backend = false;
 
-            this.connect('startup', this.startup.bind(this));
-            this.connect('activate', this.activate.bind(this));
-            this.connect('handle-local-options', this.handle_local_options.bind(this));
+            this.method_handler(this, 'startup', this.startup);
+            this.method_handler(this, 'activate', this.activate);
+            this.method_handler(this, 'handle-local-options', this.handle_local_options);
+            this.method_handler(this, 'shutdown', this.shutdown);
 
             this.window = null;
             this.prefs_dialog = null;
@@ -116,7 +122,7 @@ const Application = GObject.registerClass(
             this.add_action(this.settings.create_action('scroll-on-keystroke'));
 
             this.gtk_settings = Gtk.Settings.get_default();
-            this.settings.connect('changed::theme-variant', this.update_theme.bind(this));
+            this.method_handler(this.settings, 'changed::theme-variant', this.update_theme);
             this.update_theme();
 
             this.setup_shortcut('shortcut-window-hide', 'win.hide');
@@ -144,7 +150,7 @@ const Application = GObject.registerClass(
             const action = new Gio.SimpleAction({
                 name,
             });
-            action.connect('activate', func);
+            this.signal_connect(action, 'activate', func);
             this.add_action(action);
             return action;
         }
@@ -170,6 +176,10 @@ const Application = GObject.registerClass(
             return -1;
         }
 
+        shutdown() {
+            this.emit('destroy');
+        }
+
         preferences() {
             if (this.prefs_dialog === null) {
                 this.prefs_dialog = new imports.prefsdialog.PrefsDialog({
@@ -177,7 +187,7 @@ const Application = GObject.registerClass(
                     settings: this.settings,
                 });
 
-                this.prefs_dialog.signal_connect(this.prefs_dialog, 'delete-event', () => {
+                this.signal_connect(this.prefs_dialog, 'delete-event', () => {
                     this.prefs_dialog = null;
                 });
             }
@@ -200,11 +210,11 @@ const Application = GObject.registerClass(
 
         setup_shortcut(key, action) {
             const update_fn = this.update_shortcut.bind(this, key, action);
-            this.settings.connect(`changed::${key}`, update_fn);
-            this.settings.connect('changed::shortcuts-enabled', update_fn);
+            this.signal_connect(this.settings, `changed::${key}`, update_fn);
+            this.signal_connect(this.settings, 'changed::shortcuts-enabled', update_fn);
 
             if (action === 'win.hide')
-                this.settings.connect('changed::hide-window-on-esc', update_fn);
+                this.signal_connect(this.settings, 'changed::hide-window-on-esc', update_fn);
 
             update_fn();
         }
@@ -220,6 +230,8 @@ const Application = GObject.registerClass(
         }
     }
 );
+
+Object.assign(Application.prototype, util.UtilMixin);
 
 GLib.set_prgname('com.github.amezin.ddterm');
 GLib.set_application_name('Drop Down Terminal');
