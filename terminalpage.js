@@ -178,7 +178,7 @@ var TerminalPage = GObject.registerClass(
             });
             this.method_handler(this.use_custom_title_action, 'activate', this.toggle_custom_title);
             this.method_handler(this.settings, 'changed::tab-title-template', this.update_tab_title_template);
-            this.method_handler(this.custom_tab_title_entry, 'changed', this.update_tab_title_template);
+            // this.method_handler(this.custom_tab_title_entry, 'changed', this.update_tab_title_template);
 
             TITLE_TERMINAL_PROPERTIES.forEach(prop => {
                 this.method_handler(this.terminal, `notify::${prop}`, this.update_tab_title);

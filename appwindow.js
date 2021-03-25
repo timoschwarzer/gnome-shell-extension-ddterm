@@ -79,9 +79,9 @@ var AppWindow = GObject.registerClass(
             this.simple_action('next-tab', () => this.notebook.next_page());
             this.simple_action('prev-tab', () => this.notebook.prev_page());
 
-            this.bind_settings_ro('new-tab-button', this.new_tab_button, 'visible');
-            this.bind_settings_ro('new-tab-front-button', this.new_tab_front_button, 'visible');
-            this.bind_settings_ro('tab-switcher-popup', this.tab_switch_button, 'visible');
+            // this.bind_settings_ro('new-tab-button', this.new_tab_button, 'visible');
+            // this.bind_settings_ro('new-tab-front-button', this.new_tab_front_button, 'visible');
+            // this.bind_settings_ro('tab-switcher-popup', this.tab_switch_button, 'visible');
 
             this.method_handler(this.settings, 'changed::tab-policy', this.update_tab_bar_visibility);
             this.method_handler(this.notebook, 'page-added', this.update_tab_bar_visibility);
