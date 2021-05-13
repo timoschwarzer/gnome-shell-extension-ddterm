@@ -104,7 +104,7 @@ const extension_connections = new ConnectionSet();
 const current_window_connections = new ConnectionSet();
 const animation_overrides_connections = new ConnectionSet();
 const hide_when_focus_lost_connections = new ConnectionSet();
-const update_height_setting_on_grab_end_connections = new ConnectionSet();
+const update_size_setting_on_grab_end_connections = new ConnectionSet();
 
 function init() {
 }
@@ -140,8 +140,8 @@ function enable() {
     extension_connections.connect(global.display, 'window-created', handle_window_created);
     extension_connections.connect(settings, 'changed::window-above', set_window_above);
     extension_connections.connect(settings, 'changed::window-stick', set_window_stick);
-    extension_connections.connect(settings, 'changed::window-height', disable_window_maximize_setting);
-    extension_connections.connect(settings, 'changed::window-height', update_window_geometry);
+    extension_connections.connect(settings, 'changed::window-size', disable_window_maximize_setting);
+    extension_connections.connect(settings, 'changed::window-size', update_window_geometry);
     extension_connections.connect(settings, 'changed::window-skip-taskbar', set_skip_taskbar);
     extension_connections.connect(settings, 'changed::window-maximize', set_window_maximized);
     extension_connections.connect(settings, 'changed::override-window-animation', setup_animation_overrides);
@@ -150,7 +150,7 @@ function enable() {
     setup_animation_overrides();
     setup_hide_when_focus_lost();
 
-    setup_update_height_setting_on_grab_end();
+    setup_update_size_setting_on_grab_end();
 
     DBUS_INTERFACE.export(Gio.DBus.session, '/org/gnome/Shell/Extensions/ddterm');
 }
@@ -178,7 +178,7 @@ function disable() {
     extension_connections.disconnect();
     animation_overrides_connections.disconnect();
     hide_when_focus_lost_connections.disconnect();
-    update_height_setting_on_grab_end_connections.disconnect();
+    update_size_setting_on_grab_end_connections.disconnect();
 }
 
 function spawn_app() {
@@ -392,7 +392,7 @@ function set_current_window(win) {
     current_window_connections.connect(win, 'unmanaged', release_window);
     current_window_connections.connect(win, 'notify::maximized-vertically', unmaximize_window);
 
-    setup_update_height_setting_on_grab_end();
+    setup_update_size_setting_on_grab_end();
     setup_hide_when_focus_lost();
     setup_animation_overrides();
 
@@ -424,7 +424,7 @@ function workarea_for_window(win) {
 
 function target_rect_for_workarea(workarea) {
     const target_rect = workarea.copy();
-    target_rect.height *= settings.get_double('window-height');
+    target_rect.height *= settings.get_double('window-size');
     return target_rect;
 }
 
@@ -467,7 +467,7 @@ function set_window_maximized() {
 }
 
 function disable_window_maximize_setting() {
-    // maximize state is always off after a height change
+    // maximize state is always off after a size change
     settings.set_boolean('window-maximize', false);
 }
 
@@ -492,7 +492,7 @@ function update_window_geometry() {
     }
 }
 
-function update_height_setting_on_grab_end(display, p0, p1) {
+function update_size_setting_on_grab_end(display, p0, p1) {
     // On Mutter <=3.38 p0 is display too. On 40 p0 is the window.
     const win = p0 instanceof Meta.Window ? p0 : p1;
 
@@ -500,15 +500,15 @@ function update_height_setting_on_grab_end(display, p0, p1) {
         return;
 
     const workarea = workarea_for_window(win);
-    const current_height = win.get_frame_rect().height / workarea.height;
-    settings.set_double('window-height', Math.min(1.0, current_height));
+    const current_size = win.get_frame_rect().height / workarea.height;
+    settings.set_double('window-size', Math.min(1.0, current_size));
 }
 
-function setup_update_height_setting_on_grab_end() {
-    update_height_setting_on_grab_end_connections.disconnect();
+function setup_update_size_setting_on_grab_end() {
+    update_size_setting_on_grab_end_connections.disconnect();
 
     if (current_window)
-        update_height_setting_on_grab_end_connections.connect(global.display, 'grab-op-end', update_height_setting_on_grab_end);
+        update_size_setting_on_grab_end_connections.connect(global.display, 'grab-op-end', update_size_setting_on_grab_end);
 }
 
 function release_window(win) {
@@ -518,7 +518,7 @@ function release_window(win) {
     current_window_connections.disconnect();
     current_window = null;
 
-    update_height_setting_on_grab_end_connections.disconnect();
+    update_size_setting_on_grab_end_connections.disconnect();
     hide_when_focus_lost_connections.disconnect();
     animation_overrides_connections.disconnect();
 }
