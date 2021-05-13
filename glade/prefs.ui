@@ -520,7 +520,7 @@
         <property name="visible">True</property>
         <property name="can-focus">True</property>
         <child>
-          <!-- n-columns=2 n-rows=13 -->
+          <!-- n-columns=2 n-rows=14 -->
           <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
@@ -571,7 +571,7 @@
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">4</property>
+                <property name="top-attach">5</property>
                 <property name="width">2</property>
               </packing>
             </child>
@@ -587,7 +587,7 @@
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">5</property>
+                <property name="top-attach">6</property>
                 <property name="width">2</property>
               </packing>
             </child>
@@ -602,7 +602,7 @@
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">1</property>
+                <property name="top-attach">2</property>
               </packing>
             </child>
             <child>
@@ -617,7 +617,7 @@
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">1</property>
+                <property name="top-attach">2</property>
               </packing>
             </child>
             <child>
@@ -632,7 +632,7 @@
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">8</property>
+                <property name="top-attach">9</property>
                 <property name="width">2</property>
               </packing>
             </child>
@@ -648,7 +648,7 @@
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">6</property>
+                <property name="top-attach">7</property>
                 <property name="width">2</property>
               </packing>
             </child>
@@ -664,7 +664,7 @@
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">7</property>
+                <property name="top-attach">8</property>
                 <property name="width">2</property>
               </packing>
             </child>
@@ -680,7 +680,7 @@
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">10</property>
+                <property name="top-attach">11</property>
                 <property name="width">2</property>
               </packing>
             </child>
@@ -697,7 +697,7 @@ You'll have to close all tabs for this option to take effect.</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">11</property>
+                <property name="top-attach">12</property>
                 <property name="width">2</property>
               </packing>
             </child>
@@ -712,7 +712,7 @@ You'll have to close all tabs for this option to take effect.</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">12</property>
+                <property name="top-attach">13</property>
               </packing>
             </child>
             <child>
@@ -736,7 +736,7 @@ You'll have to close all tabs for this option to take effect.</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">12</property>
+                <property name="top-attach">13</property>
               </packing>
             </child>
             <child>
@@ -750,7 +750,7 @@ You'll have to close all tabs for this option to take effect.</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">2</property>
+                <property name="top-attach">3</property>
               </packing>
             </child>
             <child>
@@ -764,7 +764,7 @@ You'll have to close all tabs for this option to take effect.</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">2</property>
+                <property name="top-attach">3</property>
               </packing>
             </child>
             <child>
@@ -779,7 +779,7 @@ You'll have to close all tabs for this option to take effect.</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">3</property>
+                <property name="top-attach">4</property>
                 <property name="width">2</property>
               </packing>
             </child>
@@ -794,8 +794,36 @@ You'll have to close all tabs for this option to take effect.</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">9</property>
+                <property name="top-attach">10</property>
                 <property name="width">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Position:</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBoxText" id="window_position_combo">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <items>
+                  <item id="top" translatable="yes">Top</item>
+                  <item id="bottom" translatable="yes">Bottom</item>
+                  <item id="left" translatable="yes">Left</item>
+                  <item id="right" translatable="yes">Right</item>
+                </items>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">1</property>
               </packing>
             </child>
           </object>

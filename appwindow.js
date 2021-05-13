@@ -15,7 +15,17 @@ var ExtensionDBusProxy = Gio.DBusProxy.makeProxyWrapper(EXTENSION_DBUS_XML);
 var AppWindow = GObject.registerClass(
     {
         Template: util.APP_DATA_DIR.get_child('appwindow.ui').get_uri(),
-        Children: ['notebook', 'resize_box', 'tab_switch_button', 'new_tab_button', 'new_tab_front_button', 'tab_switch_menu_box'],
+        Children: [
+            'notebook',
+            'resize_box_south',
+            'resize_box_north',
+            'resize_box_east',
+            'resize_box_west',
+            'tab_switch_button',
+            'new_tab_button',
+            'new_tab_front_button',
+            'tab_switch_menu_box',
+        ],
         Properties: {
             'menus': GObject.ParamSpec.object(
                 'menus', '', '', GObject.ParamFlags.READWRITE | GObject.ParamFlags.CONSTRUCT_ONLY, Gtk.Builder
@@ -66,9 +76,26 @@ var AppWindow = GObject.registerClass(
                 this.insert_page(this.notebook.get_current_page() + 1);
             });
 
-            this.method_handler(this.resize_box, 'realize', this.set_resize_cursor);
-            this.method_handler(this.resize_box, 'button-press-event', this.start_resizing);
-            this.bind_settings_ro('window-resizable', this.resize_box, 'visible');
+            const setup_resize_box = (box, cursor_name, position) => {
+                this.signal_connect(box, 'realize', () => {
+                    box.window.cursor = Gdk.Cursor.new_from_name(box.get_display(), cursor_name);
+                });
+
+                this.method_handler(box, 'button-press-event', this.start_resizing);
+
+                const update_visibility = () => {
+                    box.visible = this.settings.get_boolean('window-resizable') && (this.settings.get_string('window-position') === position);
+                };
+
+                this.signal_connect(this.settings, 'changed::window-resizable', update_visibility);
+                this.signal_connect(this.settings, 'changed::window-position', update_visibility);
+                update_visibility();
+            };
+
+            setup_resize_box(this.resize_box_south, 'ns-resize', 'top');
+            setup_resize_box(this.resize_box_north, 'ns-resize', 'bottom');
+            setup_resize_box(this.resize_box_east, 'ew-resize', 'left');
+            setup_resize_box(this.resize_box_west, 'ew-resize', 'right');
 
             this.tab_select_action = new Gio.PropertyAction({
                 name: 'switch-to-tab',
@@ -233,22 +260,36 @@ var AppWindow = GObject.registerClass(
                 this.close();
         }
 
-        set_resize_cursor(widget) {
-            widget.window.cursor = Gdk.Cursor.new_from_name(widget.get_display(), 'ns-resize');
-        }
-
-        start_resizing(_, event) {
+        start_resizing(box, event) {
             const [button_ok, button] = event.get_button();
             if (!button_ok || button !== Gdk.BUTTON_PRIMARY)
                 return;
-
-            this.extension_dbus.BeginResizeSync();
 
             const [coords_ok, x_root, y_root] = event.get_root_coords();
             if (!coords_ok)
                 return;
 
-            this.window.begin_resize_drag_for_device(Gdk.WindowEdge.SOUTH, event.get_device(), button, x_root, y_root, event.get_time());
+            if (box === this.resize_box_south || box === this.resize_box_north)
+                this.extension_dbus.BeginResizeVerticalSync();
+
+            if (box === this.resize_box_east || box === this.resize_box_west)
+                this.extension_dbus.BeginResizeHorizontalSync();
+
+            let window_edge;
+
+            if (box === this.resize_box_south)
+                window_edge = Gdk.WindowEdge.SOUTH;
+
+            if (box === this.resize_box_north)
+                window_edge = Gdk.WindowEdge.NORTH;
+
+            if (box === this.resize_box_east)
+                window_edge = Gdk.WindowEdge.EAST;
+
+            if (box === this.resize_box_west)
+                window_edge = Gdk.WindowEdge.WEST;
+
+            this.window.begin_resize_drag_for_device(window_edge, event.get_device(), button, x_root, y_root, event.get_time());
         }
 
         draw(_widget, cr) {

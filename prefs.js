@@ -84,6 +84,7 @@ function createPrefsWidgetClass(resource_path, util) {
                 'window_size_adjustment',
                 'window_size_scale',
                 'shortcuts_treeview',
+                'window_position_combo',
             ].concat(palette_widgets()),
             Properties: {
                 'settings': GObject.ParamSpec.object('settings', '', '', GObject.ParamFlags.READWRITE | GObject.ParamFlags.CONSTRUCT_ONLY, Gio.Settings),
@@ -134,6 +135,7 @@ function createPrefsWidgetClass(resource_path, util) {
                 );
 
                 this.settings_bind('theme-variant', this.theme_variant_combo, 'active-id');
+                this.settings_bind('window-position', this.window_position_combo, 'active-id');
                 this.settings_bind('window-type-hint', this.window_type_hint_combo, 'active-id');
                 this.settings_bind('tab-policy', this.tab_policy_combo, 'active-id');
                 this.settings_bind('tab-position', this.tab_position_combo, 'active-id');
