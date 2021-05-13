@@ -36,10 +36,11 @@ class ExtensionDBusInterface {
         if (!current_window || !current_window.maximized_vertically)
             return;
 
+        const workarea = workarea_for_window(current_window);
+
         Main.wm.skipNextEffect(current_window.get_compositor_private());
         current_window.unmaximize(Meta.MaximizeFlags.VERTICAL);
 
-        const workarea = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.currentMonitor.index);
         move_resize_window(current_window, workarea);
     }
 
